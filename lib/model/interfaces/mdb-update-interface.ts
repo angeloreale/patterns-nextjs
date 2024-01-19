@@ -71,7 +71,33 @@ export const addToFavorites = async ({
 }: { email: UserSchema["email"], cid: number }) => {
   const collection = await getUserCollection();
   const query = `rickmorty.favorites.${type}`
+  const $query = `$${query}}`
   console.log({ query, email })
-  const user = await collection.updateOne({ email }, {$addToSet: { [query]: cid }});
+
+  const user = await collection.updateOne(
+    { email }, 
+    { $set: {
+                [query]: {
+                    $cond: [
+                        {
+                            $in: ["1", $query]
+                        },
+                        {
+                            $setDifference: [$query, ["1"]]
+                        },
+                        {
+                            $concatArrays: [$query, ["1"]]
+                        }
+                    ]
+                }
+            }
+    }
+  )
+
+
+  {
+            
+        }
+  //const user = await collection.updateOne({ email }, {$addToSet: { [query]: cid }});
   return user;
 };
